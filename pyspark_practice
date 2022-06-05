@@ -1,0 +1,568 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Copy of Untitled2.ipynb",
+      "provenance": [],
+      "collapsed_sections": [],
+      "authorship_tag": "ABX9TyNJE1onDBHJiSBURUW96D8u",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/lrtipple/PysparkPractice/blob/main/pyspark_practice\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "It8QESzGpb3n",
+        "outputId": "a35efde1-67d4-4f34-ca7d-4da3f52ee243"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\r0% [Working]\r            \rHit:1 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64  InRelease\n",
+            "\r0% [Connecting to archive.ubuntu.com (91.189.91.39)] [Connecting to security.ub\r0% [1 InRelease gpgv 1,581 B] [Connecting to archive.ubuntu.com (91.189.91.39)]\r                                                                               \rIgn:2 https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64  InRelease\n",
+            "\r0% [1 InRelease gpgv 1,581 B] [Connecting to archive.ubuntu.com (91.189.91.39)]\r                                                                               \rHit:3 https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64  Release\n",
+            "\r0% [1 InRelease gpgv 1,581 B] [Waiting for headers] [Waiting for headers] [Wait\r                                                                               \rHit:4 https://cloud.r-project.org/bin/linux/ubuntu bionic-cran40/ InRelease\n",
+            "\r0% [1 InRelease gpgv 1,581 B] [Waiting for headers] [Waiting for headers] [Conn\r                                                                               \rHit:5 http://archive.ubuntu.com/ubuntu bionic InRelease\n",
+            "Hit:6 http://security.ubuntu.com/ubuntu bionic-security InRelease\n",
+            "Hit:7 http://archive.ubuntu.com/ubuntu bionic-updates InRelease\n",
+            "Hit:8 http://ppa.launchpad.net/c2d4u.team/c2d4u4.0+/ubuntu bionic InRelease\n",
+            "Hit:9 http://archive.ubuntu.com/ubuntu bionic-backports InRelease\n",
+            "Hit:11 http://ppa.launchpad.net/cran/libgit2/ubuntu bionic InRelease\n",
+            "Hit:12 http://ppa.launchpad.net/deadsnakes/ppa/ubuntu bionic InRelease\n",
+            "Hit:13 http://ppa.launchpad.net/graphics-drivers/ppa/ubuntu bionic InRelease\n",
+            "Reading package lists... Done\n"
+          ]
+        }
+      ],
+      "source": [
+        "import os\n",
+        "# Find the latest version of spark 3.0  from http://www.apache.org/dist/spark/ and enter as the spark version\n",
+        "# For example:\n",
+        "# spark_version = 'spark-3.0.3'\n",
+        "spark_version = 'spark-3.0.3'\n",
+        "os.environ['SPARK_VERSION']=spark_version\n",
+        "\n",
+        "# Install Spark and Java\n",
+        "!apt-get update\n",
+        "!apt-get install openjdk-11-jdk-headless -qq > /dev/null\n",
+        "!wget -q http://www.apache.org/dist/spark/$SPARK_VERSION/$SPARK_VERSION-bin-hadoop2.7.tgz\n",
+        "!tar xf $SPARK_VERSION-bin-hadoop2.7.tgz\n",
+        "!pip install -q findspark\n",
+        "\n",
+        "# Set Environment Variables\n",
+        "import os\n",
+        "os.environ[\"JAVA_HOME\"] = \"/usr/lib/jvm/java-11-openjdk-amd64\"\n",
+        "os.environ[\"SPARK_HOME\"] = f\"/content/{spark_version}-bin-hadoop2.7\"\n",
+        "\n",
+        "# Start a SparkSession\n",
+        "import findspark\n",
+        "findspark.init()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Start Spark session\n",
+        "from pyspark.sql import SparkSession\n",
+        "spark = SparkSession.builder.appName(\"DataFrameBasics\").getOrCreate()"
+      ],
+      "metadata": {
+        "id": "oAcCGtK9rfhg"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "dataframe = spark.createDataFrame([\n",
+        "                                   (0, \"Here is our DataFame\"),\n",
+        "                                   (1, \"We are making on from scratch\"),\n",
+        "                                   (2, \"This will look very similar to a Pandas DataFrame\")\n",
+        "], [\"id\", \"words\"])\n",
+        "dataframe.show()\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "2foUsACfruEO",
+        "outputId": "8e5268e4-3bb9-493b-8dd3-2081131eca8e"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+---+--------------------+\n",
+            "| id|               words|\n",
+            "+---+--------------------+\n",
+            "|  0|Here is our DataFame|\n",
+            "|  1|We are making on ...|\n",
+            "|  2|This will look ve...|\n",
+            "+---+--------------------+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Read in data from S3 Buckets\n",
+        "from pyspark import SparkFiles\n",
+        "url = \"https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-online/module_16/food.csv\"\n",
+        "spark.sparkContext.addFile(url)\n",
+        "df = spark.read.csv(SparkFiles.get(\"food.csv\"), sep=\",\", header=True)"
+      ],
+      "metadata": {
+        "id": "qY4JDzEMsY8I"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "KmyhASGes182",
+        "outputId": "3195bdc4-fd48-4e53-a9b3-3abae1bbacf8"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+-------+-----+\n",
+            "|   food|price|\n",
+            "+-------+-----+\n",
+            "|  pizza|    0|\n",
+            "|  sushi|   12|\n",
+            "|chinese|   10|\n",
+            "+-------+-----+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Print our schema\n",
+        "df.printSchema()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "AteQlVtntADo",
+        "outputId": "b3d3ba74-2abb-485f-88db-24110468c56f"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "root\n",
+            " |-- food: string (nullable = true)\n",
+            " |-- price: string (nullable = true)\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#show the columns\n",
+        "df.columns"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "jrY0FHLatEDu",
+        "outputId": "cd167c97-6e37-4476-834f-deae32e3cf51"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "['food', 'price']"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 9
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#describe our data\n",
+        "#df.describe\n",
+        "df.describe()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "bM5HPCCUtI9W",
+        "outputId": "1f54e0fc-ccf3-4c3a-c10e-22eb17579974"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "DataFrame[summary: string, food: string, price: string]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 12
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Import struct fields that we can use (different types of data)\n",
+        "from pyspark.sql.types import StructField, StringType, IntegerType, StructType"
+      ],
+      "metadata": {
+        "id": "cl3zBVeLwIMe"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Next we need to create the list of struct fields. struct field defines column name, data type held, \n",
+        "# and boolean to define whether nulls will be included\n",
+        "schema = [StructField(\"food\", StringType(), True), StructField(\"price\", IntegerType(), True),]\n",
+        "schema"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "QVEnF1VjwIhe",
+        "outputId": "63365b89-7c7f-434a-fc65-77df2cf427bb"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[StructField(food,StringType,true), StructField(price,IntegerType,true)]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 16
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#nter the code that will pass the schema just created as fields in a StructType. \n",
+        "# stored in a variable called final\n",
+        "\n",
+        "# Pass in our fields\n",
+        "final = StructType(fields=schema)\n",
+        "final"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "SlkgZWPowzf7",
+        "outputId": "dee1b058-1487-42bf-967b-4d62d9aae446"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "StructType(List(StructField(food,StringType,true),StructField(price,IntegerType,true)))"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 19
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Read our data with our new schema\n",
+        "dataframe = spark.read.csv(SparkFiles.get(\"food.csv\"), schema=final, sep=\",\", header=True)\n",
+        "dataframe.printSchema()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "QcYx5qOm0HHG",
+        "outputId": "b2f29f76-d5ad-4ab4-fec1-a1c83f75eea1"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "root\n",
+            " |-- food: string (nullable = true)\n",
+            " |-- price: integer (nullable = true)\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "dataframe['price']"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "uKe-Pa140UqF",
+        "outputId": "48691d58-6829-4983-f86d-4576440ab95e"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "Column<b'price'>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 23
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "type(dataframe['price'])"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "FGkNhChV0c-x",
+        "outputId": "fa5ce2a2-b804-4aa1-a78c-3a1658c23d5d"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "pyspark.sql.column.Column"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 24
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "dataframe.select('price')"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "d4GLE9GY0h2S",
+        "outputId": "525e2a9c-ffe8-49ed-df7e-6ccd82583390"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "DataFrame[price: int]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 25
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "type(dataframe.select('price'))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "CWVJulY80h5S",
+        "outputId": "7a5360ab-83b0-47e3-ff3e-15f2e4229cf2"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "pyspark.sql.dataframe.DataFrame"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 26
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "dataframe.select('price').show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "pbKzl7Hr0h7U",
+        "outputId": "2be77a19-327b-45ec-c2fc-e6827b04fbbf"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+-----+\n",
+            "|price|\n",
+            "+-----+\n",
+            "|    0|\n",
+            "|   12|\n",
+            "|   10|\n",
+            "+-----+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Add new column\n",
+        "dataframe.withColumn('newprice', dataframe['price']).show()\n",
+        "# Update column name\n",
+        "dataframe.withColumnRenamed('price','newerprice').show()\n",
+        "# Double the price\n",
+        "dataframe.withColumn('doubleprice',dataframe['price']*2).show()\n",
+        "# Add a dollar to the price\n",
+        "dataframe.withColumn('add_one_dollar',dataframe['price']+1).show()\n",
+        "# Half the price\n",
+        "dataframe.withColumn('half_price',dataframe['price']/2).show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "_rud9cHk1BNw",
+        "outputId": "f4350ec6-b7fa-4902-b1a2-62147d14554b"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+-------+-----+--------+\n",
+            "|   food|price|newprice|\n",
+            "+-------+-----+--------+\n",
+            "|  pizza|    0|       0|\n",
+            "|  sushi|   12|      12|\n",
+            "|chinese|   10|      10|\n",
+            "+-------+-----+--------+\n",
+            "\n",
+            "+-------+----------+\n",
+            "|   food|newerprice|\n",
+            "+-------+----------+\n",
+            "|  pizza|         0|\n",
+            "|  sushi|        12|\n",
+            "|chinese|        10|\n",
+            "+-------+----------+\n",
+            "\n",
+            "+-------+-----+-----------+\n",
+            "|   food|price|doubleprice|\n",
+            "+-------+-----+-----------+\n",
+            "|  pizza|    0|          0|\n",
+            "|  sushi|   12|         24|\n",
+            "|chinese|   10|         20|\n",
+            "+-------+-----+-----------+\n",
+            "\n",
+            "+-------+-----+--------------+\n",
+            "|   food|price|add_one_dollar|\n",
+            "+-------+-----+--------------+\n",
+            "|  pizza|    0|             1|\n",
+            "|  sushi|   12|            13|\n",
+            "|chinese|   10|            11|\n",
+            "+-------+-----+--------------+\n",
+            "\n",
+            "+-------+-----+----------+\n",
+            "|   food|price|half_price|\n",
+            "+-------+-----+----------+\n",
+            "|  pizza|    0|       0.0|\n",
+            "|  sushi|   12|       6.0|\n",
+            "|chinese|   10|       5.0|\n",
+            "+-------+-----+----------+\n",
+            "\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
